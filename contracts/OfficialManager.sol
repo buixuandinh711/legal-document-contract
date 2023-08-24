@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.20;
+pragma solidity 0.8.19;
 
 import "./DivisionManager.sol";
 import "./interfaces/IOfficialManager.sol";
@@ -35,10 +35,10 @@ contract OfficialManager is DivisionManager, IOfficialManager {
         string calldata divisionId,
         uint256 creatorPositionIndex
     ) internal view {
-        requireValidPositionIndex(msg.sender, divisionId, creatorPositionIndex);
+        if (msg.sender == getSystemAdmin()) return;
 
+        requireValidPositionIndex(msg.sender, divisionId, creatorPositionIndex);
         if (
-            msg.sender != getSystemAdmin() &&
             !(_officials[msg.sender].status == OfficialStatus.ACTIVE &&
                 _positions[msg.sender][divisionId][creatorPositionIndex].role ==
                 PositionRole.DIVISION_ADMIN)
@@ -77,8 +77,8 @@ contract OfficialManager is DivisionManager, IOfficialManager {
         _officials[officialAddress] = Official(info, OfficialStatus.ACTIVE);
 
         if (
-            position.role != PositionRole.DIVISION_ADMIN ||
-            position.role != PositionRole.MANAGER ||
+            position.role != PositionRole.DIVISION_ADMIN &&
+            position.role != PositionRole.MANAGER &&
             position.role != PositionRole.STAFF
         ) revert InvalidCreatedOfficialRole();
         uint256 positionIndex = _positions[officialAddress][divisionId].length;
