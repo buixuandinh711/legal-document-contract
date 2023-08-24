@@ -10,47 +10,69 @@ contract OfficialManager is DivisionManager, IOfficialManager {
     mapping(address => Official) private _officials;
 
     // official address => divisionId => position id => position info
-    mapping(address => mapping(string => mapping(uint256 => Position)))
-        private _positions;
+    mapping(address => mapping(string => Position[])) private _positions;
 
-    modifier onlySystemAdminOrDivisionAdmin(
-        string calldata divisionId,
-        uint256 creatorPositionId
-    ) {
+    //------------------------ Modifiers ----------------------------------/
+    function requireCreatedOfficial(address officialAddress) internal view {
+        if (_officials[officialAddress].status == OfficialStatus.NOT_CREATED) {
+            revert OfficialNotCreated();
+        }
+    }
+
+    function requireValidPositionIndex(
+        address officialAddress,
+        string memory divisionId,
+        uint256 positionIndex
+    ) internal view {
+        if (positionIndex >= _positions[officialAddress][divisionId].length) {
+            revert PositionIndexOutOfRange();
+        }
+    }
+
+    function requireSystemAdminOrDivisionAdmin(
+        string memory divisionId,
+        uint256 creatorPositionIndex
+    ) internal view {
         if (
             msg.sender != getSystemAdmin() &&
             !(_officials[msg.sender].status == OfficialStatus.ACTIVE &&
-                _positions[msg.sender][divisionId][creatorPositionId].role ==
+                _positions[msg.sender][divisionId][creatorPositionIndex].role ==
                 PositionRole.DIVISION_ADMIN)
-        ) revert NotSystemAdminOrDivisionAdmin();
-        _;
+        ) {
+            revert NotSystemAdminOrDivisionAdmin();
+        }
     }
 
-    function creteOfficial(
+    //------------------------ External functions ----------------------------------/
+    function createOfficial(
         address officialAddress,
         OfficialInfo calldata info,
         string calldata divisionId,
-        uint256 creatorPositionId,
-        uint256 positionId,
+        uint256 creatorPositionIndex,
         Position calldata position
-    )
-        external
-        override
-        onlySystemAdminOrDivisionAdmin(divisionId, creatorPositionId)
-    {
+    ) external override onlyCreatedDivision(divisionId) {
+        requireValidPositionIndex(msg.sender, divisionId, creatorPositionIndex);
+        requireSystemAdminOrDivisionAdmin(divisionId, creatorPositionIndex);
+
         if (_officials[officialAddress].status != OfficialStatus.NOT_CREATED)
             revert OfficialAlreadyCreated();
 
         _officials[officialAddress] = Official(info, OfficialStatus.ACTIVE);
 
-        _positions[officialAddress][divisionId][positionId] = position;
+        if (
+            position.role != PositionRole.DIVISION_ADMIN ||
+            position.role != PositionRole.MANAGER ||
+            position.role != PositionRole.STAFF
+        ) revert InvalidCreatedOfficialRole();
+        uint256 positionIndex = _positions[officialAddress][divisionId].length;
+        _positions[officialAddress][divisionId].push(position);
 
         emit OfficialCreated(
             officialAddress,
             info,
             divisionId,
-            creatorPositionId,
-            positionId,
+            creatorPositionIndex,
+            positionIndex,
             position
         );
     }
@@ -59,38 +81,13 @@ contract OfficialManager is DivisionManager, IOfficialManager {
         address officialAddress,
         OfficialInfo calldata info
     ) external override onlySystemAdmin {
-        Official storage official = _officials[officialAddress];
+        requireCreatedOfficial(officialAddress);
 
-        if (official.status == OfficialStatus.NOT_CREATED)
-            revert OfficialNotCreated();
+        Official storage official = _officials[officialAddress];
 
         official.info = info;
 
         emit OfficialInfoUpdated(officialAddress, info);
-    }
-
-    function updateOfficialPosition(
-        address officialAddress,
-        string calldata divisionId,
-        uint256 creatorPositionId,
-        uint256 positionId,
-        Position calldata position
-    )
-        external
-        override
-        onlySystemAdminOrDivisionAdmin(divisionId, creatorPositionId)
-    {
-        if (_officials[officialAddress].status == OfficialStatus.NOT_CREATED)
-            revert OfficialNotCreated();
-        _positions[officialAddress][divisionId][positionId] = position;
-
-        emit OfficialPositionUpdated(
-            officialAddress,
-            divisionId,
-            creatorPositionId,
-            positionId,
-            position
-        );
     }
 
     function deactivateOfficial(
@@ -107,17 +104,119 @@ contract OfficialManager is DivisionManager, IOfficialManager {
         _officials[officialAddress].status = OfficialStatus.ACTIVE;
     }
 
+    function updatePositionName(
+        address officialAddress,
+        string calldata divisionId,
+        uint256 creatorPositionIndex,
+        uint256 positionIndex,
+        string calldata newPositionName
+    ) external override onlyCreatedDivision(divisionId) {
+        requireCreatedOfficial(officialAddress);
+        requireValidPositionIndex(msg.sender, divisionId, creatorPositionIndex);
+        requireValidPositionIndex(officialAddress, divisionId, positionIndex);
+        requireSystemAdminOrDivisionAdmin(divisionId, creatorPositionIndex);
+
+        _positions[officialAddress][divisionId][positionIndex]
+            .name = newPositionName;
+
+        emit PositionNameUpdated(
+            officialAddress,
+            divisionId,
+            creatorPositionIndex,
+            positionIndex,
+            newPositionName
+        );
+    }
+
+    function updatePositionRole(
+        address officialAddress,
+        string calldata divisionId,
+        uint256 creatorPositionIndex,
+        uint256 positionIndex,
+        PositionRole newPositionRole
+    ) external override onlyCreatedDivision(divisionId) {
+        requireCreatedOfficial(officialAddress);
+        requireValidPositionIndex(msg.sender, divisionId, creatorPositionIndex);
+        requireValidPositionIndex(officialAddress, divisionId, positionIndex);
+        requireSystemAdminOrDivisionAdmin(divisionId, creatorPositionIndex);
+
+        if (
+            newPositionRole != PositionRole.DIVISION_ADMIN ||
+            newPositionRole != PositionRole.MANAGER ||
+            newPositionRole != PositionRole.STAFF
+        ) revert InvalidUpdatedRole();
+
+        _positions[officialAddress][divisionId][positionIndex]
+            .role = newPositionRole;
+
+        emit PositionRoleUpdated(
+            officialAddress,
+            divisionId,
+            creatorPositionIndex,
+            positionIndex,
+            newPositionRole
+        );
+    }
+
+    function revokePositionRole(
+        address officialAddress,
+        string calldata divisionId,
+        uint256 creatorPositionIndex,
+        uint256 positionIndex
+    ) external override onlyCreatedDivision(divisionId) {
+        requireCreatedOfficial(officialAddress);
+        requireValidPositionIndex(msg.sender, divisionId, creatorPositionIndex);
+        requireValidPositionIndex(officialAddress, divisionId, positionIndex);
+        requireSystemAdminOrDivisionAdmin(divisionId, creatorPositionIndex);
+
+        _positions[officialAddress][divisionId][positionIndex]
+            .role = PositionRole.REVOKED;
+
+        emit PositionRoleRevoked(
+            officialAddress,
+            divisionId,
+            creatorPositionIndex,
+            positionIndex
+        );
+    }
+
+    //------------------------ Public functions ----------------------------------/
     function getOfficialInfo(
         address officialAddress
-    ) external view override returns (Official memory official) {
+    ) public view override returns (Official memory official) {
+        requireCreatedOfficial(officialAddress);
+
         official = _officials[officialAddress];
     }
 
     function getOfficialPosition(
         address officialAddress,
         string calldata divisionId,
-        uint256 positionId
-    ) external view returns (Position memory position) {
-        position = _positions[officialAddress][divisionId][positionId];
+        uint256 positionIndex
+    )
+        public
+        view
+        override
+        onlyCreatedDivision(divisionId)
+        returns (Position memory position)
+    {
+        requireCreatedOfficial(officialAddress);
+        requireValidPositionIndex(officialAddress, divisionId, positionIndex);
+
+        position = _positions[officialAddress][divisionId][positionIndex];
+    }
+
+    function getOfficialPositions(
+        address officialAddress,
+        string calldata divisionId
+    )
+        public
+        view
+        onlyCreatedDivision(divisionId)
+        returns (Position[] memory positions)
+    {
+        requireCreatedOfficial(officialAddress);
+
+        positions = _positions[officialAddress][divisionId];
     }
 }

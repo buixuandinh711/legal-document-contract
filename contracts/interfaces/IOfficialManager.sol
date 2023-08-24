@@ -10,7 +10,7 @@ interface IOfficialManager {
     }
 
     enum PositionRole {
-        NOT_GRANTED,
+        REVOKED,
         DIVISION_ADMIN,
         MANAGER,
         STAFF
@@ -38,14 +38,18 @@ interface IOfficialManager {
     error NotSystemAdminOrDivisionAdmin();
     error OfficialNotActive();
     error OfficialNotDeactivated();
+    error PositionNotGranted();
+    error InvalidUpdatedRole();
+    error PositionIndexOutOfRange();
+    error InvalidCreatedOfficialRole();
 
     //------------------------ Events ----------------------------------/
     event OfficialCreated(
         address indexed officialAddress,
         OfficialInfo info,
         string divisionId,
-        uint256 creatorPositionId,
-        uint256 positionId,
+        uint256 creatorPositionIndex,
+        uint256 positionIndex,
         Position position
     );
 
@@ -54,20 +58,34 @@ interface IOfficialManager {
         OfficialInfo info
     );
 
-    event OfficialPositionUpdated(
+    event PositionNameUpdated(
         address indexed officialAddress,
         string divisionId,
-        uint256 creatorPositionId,
-        uint256 positionId,
-        Position position
+        uint256 creatorPositionIndex,
+        uint256 positionIndex,
+        string newPositionName
     );
 
-    function creteOfficial(
+    event PositionRoleUpdated(
+        address indexed officialAddress,
+        string divisionId,
+        uint256 creatorPositionIndex,
+        uint256 positionIndex,
+        PositionRole newPositionRole
+    );
+
+    event PositionRoleRevoked(
+        address indexed officialAddress,
+        string divisionId,
+        uint256 creatorPositionIndex,
+        uint256 positionIndex
+    );
+
+    function createOfficial(
         address officialAddress,
         OfficialInfo calldata info,
         string calldata divisionId,
-        uint256 creatorPositionId,
-        uint256 positionId,
+        uint256 creatorPositionIndex,
         Position calldata position
     ) external;
 
@@ -76,17 +94,32 @@ interface IOfficialManager {
         OfficialInfo calldata info
     ) external;
 
-    function updateOfficialPosition(
-        address officialAddress,
-        string calldata divisionId,
-        uint256 creatorPositionId,
-        uint256 positionId,
-        Position calldata position
-    ) external;
-
     function deactivateOfficial(address officialAddress) external;
 
     function reactivateOfficial(address officialAddress) external;
+
+    function updatePositionName(
+        address officialAddress,
+        string calldata divisionId,
+        uint256 creatorPositionIndex,
+        uint256 positionIndex,
+        string calldata newPositionName
+    ) external;
+
+    function updatePositionRole(
+        address officialAddress,
+        string calldata divisionId,
+        uint256 creatorPositionIndex,
+        uint256 positionIndex,
+        PositionRole newPositionRole
+    ) external;
+
+    function revokePositionRole(
+        address officialAddress,
+        string calldata divisionId,
+        uint256 creatorPositionIndex,
+        uint256 positionIndex
+    ) external;
 
     function getOfficialInfo(
         address officialAddress
@@ -95,6 +128,11 @@ interface IOfficialManager {
     function getOfficialPosition(
         address officialAddress,
         string calldata divisionId,
-        uint256 positionId
+        uint256 positionIndex
     ) external view returns (Position memory position);
+
+    function getOfficialPositions(
+        address officialAddress,
+        string calldata divisionId
+    ) external view returns (Position[] memory positions);
 }
