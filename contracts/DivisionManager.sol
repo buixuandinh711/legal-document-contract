@@ -9,10 +9,10 @@ contract DivisionManager is SystemAdminManger, IDivisionManager {
     // divisionId to division's info
     mapping(string => Division) private _divisions;
 
-    modifier onlyCreatedDivision(string calldata divisionId) {
+    //------------------------ Validate functions (for avoiding stack too deep) ----------------------------------/
+    function requireCreatedDivision(string calldata divisionId) internal view {
         if (_divisions[divisionId].status == DivisionStatus.NOT_CREATED)
             revert DivisionNotCreated();
-        _;
     }
 
     function createDivision(
@@ -36,7 +36,9 @@ contract DivisionManager is SystemAdminManger, IDivisionManager {
         string calldata divisionId,
         string calldata newName,
         string calldata newSupervisoryDivId
-    ) external override onlySystemAdmin onlyCreatedDivision(divisionId) {
+    ) external override onlySystemAdmin {
+        requireCreatedDivision(divisionId);
+
         Division storage currentInfo = _divisions[divisionId];
 
         currentInfo.name = newName;
@@ -73,12 +75,8 @@ contract DivisionManager is SystemAdminManger, IDivisionManager {
 
     function getDivision(
         string calldata divisionId
-    )
-        external
-        view
-        onlyCreatedDivision(divisionId)
-        returns (Division memory division)
-    {
+    ) external view returns (Division memory division) {
+        requireCreatedDivision(divisionId);
         division = _divisions[divisionId];
     }
 }

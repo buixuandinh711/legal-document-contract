@@ -42,6 +42,7 @@ interface IOfficialManager {
     error InvalidUpdatedRole();
     error PositionIndexOutOfRange();
     error InvalidCreatedOfficialRole();
+    error NotDivisionManager();
 
     //------------------------ Events ----------------------------------/
     event OfficialCreated(
