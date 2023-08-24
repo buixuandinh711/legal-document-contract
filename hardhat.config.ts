@@ -16,6 +16,15 @@ const config: HardhatUserConfig = {
         "2ec1418519d234b8e33544b400421e8b816d47338cab6e74ee4203be517b3fbb",
       ],
     },
+    besu: {
+      url: "http://127.0.0.1:8545",
+      chainId: 1337,
+      accounts: [
+        "ae6ae8e5ccbfb04590405997ee2d52d2b330726137b875053c36d94e974d162f",
+        "2ec1418519d234b8e33544b400421e8b816d47338cab6e74ee4203be517b3fbb",
+      ],
+      blockGasLimit: 1125899906842623
+    },
   },
 };
 
