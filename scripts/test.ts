@@ -1,8 +1,7 @@
 import { ethers } from "hardhat";
 import { LegalDocumentManager__factory } from "../typechain-types";
-import { ContractEvent, ContractEventPayload, EventLog } from "ethers";
-import { compressFile } from "./encode";
-import { TypedContractEvent } from "../typechain-types/common";
+import { BytesLike, ContractEvent, ContractEventPayload, EventLog } from "ethers";
+import { compressFile, decompressAndSaveToFile } from "./encode";
 
 async function main() {
   const [caller, manager] = await ethers.getSigners();
@@ -32,9 +31,22 @@ async function main() {
   );
   const divisionId = "H26.1.1";
 
-  const filter = documentManager.eve
+  documentManager.once(documentManager.getEvent("DocumentSubmitted"), async (...args) => {
+    const eventData = args[4] as unknown as ContractEventPayload;
+    const txHash = eventData.log.transactionHash;
+    console.log(txHash);
+    const tx = await ethers.provider.getTransaction(txHash);
+    if (tx) {
+      const parsedTx = documentManager.interface.parseTransaction(tx);
+      if (parsedTx) {
+        const docContent = parsedTx.args[2];
+        const base64Content = ethers.toUtf8String(docContent);
+        await decompressAndSaveToFile(base64Content, `out/decodedOut-${new Date().getTime()}.pdf`);
+      }
+    }
+  });
 
-  const data = await compressFile("./common.pdf");
+  const data = await compressFile("./medium.pdf");
   console.log(`Data length ${data.length}, submitting tx`);
   const tx = await documentManager
     .connect(manager)
