@@ -1,28 +1,19 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.20;
+pragma solidity 0.8.19;
 
 import "./OfficialManager.sol";
+import "./interfaces/ILegalDocumentManager.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-contract LegalDocumentManager is OfficialManager {
-    error SignersSignaturesLengthNotMatch();
-    error InvalidSignature();
-
-    event DocumentSubmitted(
-        bytes32 indexed documentHash,
-        string divisionId,
-        uint256 positionIndex,
-        address[] signers
-    );
-
+contract LegalDocumentManager is OfficialManager, ILegalDocumentManager {
     function submitDocument(
         string calldata divisionId,
         uint256 positionIndex,
         bytes calldata documentContent,
         address[] calldata signers,
         bytes calldata signatures
-    ) external {
+    ) external override {
         requireDivisionManager(divisionId, positionIndex);
         if (signers.length * 65 != signatures.length)
             revert SignersSignaturesLengthNotMatch();
