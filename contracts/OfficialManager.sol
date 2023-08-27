@@ -195,8 +195,6 @@ contract OfficialManager is DivisionManager, IOfficialManager {
     function getOfficialInfo(
         address officialAddress
     ) public view override returns (Official memory official) {
-        requireCreatedOfficial(officialAddress);
-
         official = _officials[officialAddress];
     }
 
@@ -205,8 +203,6 @@ contract OfficialManager is DivisionManager, IOfficialManager {
         string calldata divisionId,
         uint256 positionIndex
     ) public view override returns (Position memory position) {
-        requireValidPositionIndex(officialAddress, divisionId, positionIndex);
-
         position = _positions[officialAddress][divisionId][positionIndex];
     }
 
@@ -214,8 +210,6 @@ contract OfficialManager is DivisionManager, IOfficialManager {
         address officialAddress,
         string calldata divisionId
     ) public view returns (Position[] memory positions) {
-        requireCreatedOfficial(officialAddress);
-
         positions = _positions[officialAddress][divisionId];
     }
 }

@@ -2,20 +2,22 @@
 
 pragma solidity 0.8.19;
 
-interface IOfficialManager {
-    enum OfficialStatus {
-        NOT_CREATED,
-        ACTIVE,
-        DEACTIVATED
-    }
+import "./IDivisionManager.sol";
 
-    enum PositionRole {
-        REVOKED,
-        DIVISION_ADMIN,
-        MANAGER,
-        STAFF
-    }
+enum OfficialStatus {
+    NOT_CREATED,
+    ACTIVE,
+    DEACTIVATED
+}
 
+enum PositionRole {
+    REVOKED,
+    DIVISION_ADMIN,
+    MANAGER,
+    STAFF
+}
+
+interface IOfficialManager is IDivisionManager {
     struct OfficialInfo {
         string name;
         string sex;

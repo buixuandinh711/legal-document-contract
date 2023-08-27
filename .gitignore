@@ -10,4 +10,6 @@ cache
 artifacts
 
 **/*.pdf
+out
+data
 

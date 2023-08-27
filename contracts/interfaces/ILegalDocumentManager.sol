@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.19;
+import "./IOfficialManager.sol";
 
-interface ILegalDocumentManager {
+interface ILegalDocumentManager is IOfficialManager {
     error SignersSignaturesLengthNotMatch();
     error InvalidSignature();
 

@@ -2,16 +2,15 @@ import { ethers } from "hardhat";
 
 const main = async () => {
   const [caller, evenAcc, oddAcc] = await ethers.getSigners();
-  try {
-    const tx = await caller.sendTransaction({
-      to: oddAcc,
-      value: 1,
-    });
-    const txReceipt = await tx.wait();
-    console.log(txReceipt);
-  } catch (error) {
-    console.log(error);
-  }
+  const docSystem = await ethers.getContractAt(
+    "LegalDocumentManager",
+    "0x0000000000000000000000000000000000008888"
+  );
+  const tx = await oddAcc.sendTransaction({
+    to: evenAcc.address,
+    value: 1,
+  });
+  await tx.wait();
 };
 
 main().catch((err) => {

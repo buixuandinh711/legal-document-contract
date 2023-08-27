@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "compile": "hardhat compile",
+    "clean": "hardhat clean",
     "test": "hardhat test",
     "check-solhint": "solhint contracts/*.sol"
   },

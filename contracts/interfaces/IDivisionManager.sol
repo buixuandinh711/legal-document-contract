@@ -2,7 +2,9 @@
 
 pragma solidity 0.8.19;
 
-interface IDivisionManager {
+import "./ISystemAdminMananger.sol";
+
+interface IDivisionManager is ISystemAdminMananger {
     enum DivisionStatus {
         NOT_CREATED,
         ACTIVE,
