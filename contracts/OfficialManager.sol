@@ -35,7 +35,10 @@ contract OfficialManager is DivisionManager, IOfficialManager {
         string calldata divisionId,
         uint256 creatorPositionIndex
     ) internal view {
-        if (msg.sender == getSystemAdmin()) return;
+        if (msg.sender == getSystemAdmin()) {
+            requireCreatedDivision(divisionId);
+            return;
+        }
 
         requireValidPositionIndex(msg.sender, divisionId, creatorPositionIndex);
         if (
