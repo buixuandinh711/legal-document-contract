@@ -116,12 +116,14 @@ contract OfficialManager is DivisionManager, IOfficialManager {
         if (_officials[officialAddress].status != OfficialStatus.ACTIVE)
             revert OfficialNotActive();
         _officials[officialAddress].status = OfficialStatus.DEACTIVATED;
+        emit OfficialDeactivated(officialAddress);
     }
 
     function reactivateOfficial(address officialAddress) external override {
         if (_officials[officialAddress].status != OfficialStatus.DEACTIVATED)
             revert OfficialNotDeactivated();
         _officials[officialAddress].status = OfficialStatus.ACTIVE;
+        emit OfficialReactivated(officialAddress);
     }
 
     function updatePositionName(

@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { LegalDocumentManager, LegalDocumentManager__factory } from "../typechain-types";
-import { DivisionStatus } from "../types/contract.type";
+import { DivisionStatus } from "../utils/contract.type";
 
 describe("DivisionManager", () => {
   const SUPERVISORY_DIV_ID = "ROOT";

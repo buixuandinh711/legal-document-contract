@@ -61,6 +61,10 @@ interface IOfficialManager is IDivisionManager {
         OfficialInfo info
     );
 
+    event OfficialDeactivated(address indexed officialAddress);
+    
+    event OfficialReactivated(address indexed officialAddress);
+
     event PositionNameUpdated(
         address indexed officialAddress,
         string divisionId,
