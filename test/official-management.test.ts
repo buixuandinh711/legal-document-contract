@@ -6,7 +6,7 @@ import { DivisionStatus, OfficialStatus, PositionRole } from "../utils/contract.
 import { Result } from "ethers";
 import { toEthersResult } from "../utils/utils";
 
-describe.only("DivisionManager", () => {
+describe.only("OfficialManager", () => {
   const SUPERVISORY_DIV_ID = "ROOT";
   const DIVISION_ID = "H26";
   const DIVISION_NAME = "UBND Hanoi";
@@ -21,7 +21,7 @@ describe.only("DivisionManager", () => {
     role: PositionRole.STAFF,
   };
   const ADMIN_POSITION_INDEX = 0;
-  const [FIRST_POSITION_INDEX] = [0];
+  const [FIRST_POSITION_INDEX, SECOND_POSITION_INDEX] = [0, 1];
 
   let [admin, other]: SignerWithAddress[] = [];
   let documentManager: LegalDocumentManager;
@@ -32,13 +32,6 @@ describe.only("DivisionManager", () => {
     documentManager = await new LegalDocumentManager__factory(admin).deploy();
     await documentManager.waitForDeployment();
 
-    if (
-      this.currentTest !== undefined &&
-      this.currentTest.title === "Should fail if division not created yet"
-    ) {
-      return;
-    }
-
     const createDivTx = await documentManager
       .connect(admin)
       .createDivision(DIVISION_ID, DIVISION_NAME, SUPERVISORY_DIV_ID);
@@ -47,6 +40,8 @@ describe.only("DivisionManager", () => {
 
   describe("Call by admin", () => {
     describe("Create official", () => {
+      const NOT_CREATED_DIVISION = "H30";
+
       it("Should fail if division not created yet", async () => {
         await expect(
           documentManager
@@ -54,7 +49,7 @@ describe.only("DivisionManager", () => {
             .createOfficial(
               OFFICIAL_ADDRESS,
               OFFICIAL_INFO,
-              DIVISION_ID,
+              NOT_CREATED_DIVISION,
               ADMIN_POSITION_INDEX,
               OFFICIAL_POSITION
             )
@@ -274,6 +269,279 @@ describe.only("DivisionManager", () => {
 
         const { status } = await documentManager.getOfficialInfo(OFFICIAL_ADDRESS);
         expect(status).to.be.equal(OfficialStatus.ACTIVE);
+      });
+    });
+
+    describe("Update position name", () => {
+      const NEW_POSITION_NAME = "Vice President";
+      const NOT_CREATE_OFFICIAL = "0xA83722f7d0223C5E0459B10776A15156408Be705";
+      const NOT_CREATED_DIVISION = "H31";
+
+      beforeEach(async function () {
+        const createOfficialTx = await documentManager
+          .connect(admin)
+          .createOfficial(
+            OFFICIAL_ADDRESS,
+            OFFICIAL_INFO,
+            DIVISION_ID,
+            ADMIN_POSITION_INDEX,
+            OFFICIAL_POSITION
+          );
+        await createOfficialTx.wait();
+      });
+
+      it("Should fail to update official name if official not created yet", async () => {
+        await expect(
+          documentManager
+            .connect(admin)
+            .updatePositionName(
+              NOT_CREATE_OFFICIAL,
+              DIVISION_ID,
+              ADMIN_POSITION_INDEX,
+              FIRST_POSITION_INDEX,
+              NEW_POSITION_NAME
+            )
+        ).to.be.revertedWithCustomError(documentManager, "OfficialNotCreated");
+      });
+
+      it("Should fail to update official name if division not created yet", async () => {
+        await expect(
+          documentManager
+            .connect(admin)
+            .updatePositionName(
+              OFFICIAL_ADDRESS,
+              NOT_CREATED_DIVISION,
+              ADMIN_POSITION_INDEX,
+              FIRST_POSITION_INDEX,
+              NEW_POSITION_NAME
+            )
+        ).to.be.revertedWithCustomError(documentManager, "DivisionNotCreated");
+      });
+
+      it("Should fail to update official name if position index invalid", async () => {
+        await expect(
+          documentManager.connect(admin).updatePositionName(
+            OFFICIAL_ADDRESS,
+            DIVISION_ID,
+            ADMIN_POSITION_INDEX,
+            SECOND_POSITION_INDEX, // out of positions array
+            NEW_POSITION_NAME
+          )
+        ).to.be.revertedWithCustomError(documentManager, "PositionIndexOutOfRange");
+      });
+
+      it("Should succeed to update official name", async () => {
+        const updateNameTx = await documentManager
+          .connect(admin)
+          .updatePositionName(
+            OFFICIAL_ADDRESS,
+            DIVISION_ID,
+            ADMIN_POSITION_INDEX,
+            FIRST_POSITION_INDEX,
+            NEW_POSITION_NAME
+          );
+
+        await updateNameTx.wait();
+
+        await expect(updateNameTx)
+          .to.emit(documentManager, "PositionNameUpdated")
+          .withArgs(
+            OFFICIAL_ADDRESS,
+            DIVISION_ID,
+            ADMIN_POSITION_INDEX,
+            FIRST_POSITION_INDEX,
+            NEW_POSITION_NAME
+          );
+        const { name } = await documentManager.getOfficialPosition(
+          OFFICIAL_ADDRESS,
+          DIVISION_ID,
+          FIRST_POSITION_INDEX
+        );
+
+        expect(name).to.be.equal(NEW_POSITION_NAME);
+      });
+    });
+
+    describe("Update position role", () => {
+      const NEW_POSITION_ROLE = PositionRole.MANAGER;
+      const NOT_CREATE_OFFICIAL = "0xA83722f7d0223C5E0459B10776A15156408Be705";
+      const NOT_CREATED_DIVISION = "H31";
+
+      beforeEach(async function () {
+        const createOfficialTx = await documentManager
+          .connect(admin)
+          .createOfficial(
+            OFFICIAL_ADDRESS,
+            OFFICIAL_INFO,
+            DIVISION_ID,
+            ADMIN_POSITION_INDEX,
+            OFFICIAL_POSITION
+          );
+        await createOfficialTx.wait();
+      });
+
+      it("Should fail to update official role if official not created yet", async () => {
+        await expect(
+          documentManager
+            .connect(admin)
+            .updatePositionRole(
+              NOT_CREATE_OFFICIAL,
+              DIVISION_ID,
+              ADMIN_POSITION_INDEX,
+              FIRST_POSITION_INDEX,
+              NEW_POSITION_ROLE
+            )
+        ).to.be.revertedWithCustomError(documentManager, "OfficialNotCreated");
+      });
+
+      it("Should fail to update official role if division not created yet", async () => {
+        await expect(
+          documentManager
+            .connect(admin)
+            .updatePositionRole(
+              OFFICIAL_ADDRESS,
+              NOT_CREATED_DIVISION,
+              ADMIN_POSITION_INDEX,
+              FIRST_POSITION_INDEX,
+              NEW_POSITION_ROLE
+            )
+        ).to.be.revertedWithCustomError(documentManager, "DivisionNotCreated");
+      });
+
+      it("Should fail to update official role if position index invalid", async () => {
+        await expect(
+          documentManager.connect(admin).updatePositionRole(
+            OFFICIAL_ADDRESS,
+            DIVISION_ID,
+            ADMIN_POSITION_INDEX,
+            SECOND_POSITION_INDEX, // out of positions array
+            NEW_POSITION_ROLE
+          )
+        ).to.be.revertedWithCustomError(documentManager, "PositionIndexOutOfRange");
+      });
+
+      it("Should fail to update official role if new role invalid", async () => {
+        await expect(
+          documentManager
+            .connect(admin)
+            .updatePositionRole(
+              OFFICIAL_ADDRESS,
+              DIVISION_ID,
+              ADMIN_POSITION_INDEX,
+              FIRST_POSITION_INDEX,
+              PositionRole.REVOKED
+            )
+        ).to.be.revertedWithCustomError(documentManager, "InvalidUpdatedRole");
+      });
+
+      it("Should succeed to update official role", async () => {
+        const updateNameTx = await documentManager
+          .connect(admin)
+          .updatePositionRole(
+            OFFICIAL_ADDRESS,
+            DIVISION_ID,
+            ADMIN_POSITION_INDEX,
+            FIRST_POSITION_INDEX,
+            NEW_POSITION_ROLE
+          );
+
+        await updateNameTx.wait();
+
+        await expect(updateNameTx)
+          .to.emit(documentManager, "PositionRoleUpdated")
+          .withArgs(
+            OFFICIAL_ADDRESS,
+            DIVISION_ID,
+            ADMIN_POSITION_INDEX,
+            FIRST_POSITION_INDEX,
+            NEW_POSITION_ROLE
+          );
+        const { role } = await documentManager.getOfficialPosition(
+          OFFICIAL_ADDRESS,
+          DIVISION_ID,
+          FIRST_POSITION_INDEX
+        );
+
+        expect(role).to.be.equal(NEW_POSITION_ROLE);
+      });
+    });
+
+    describe("Revoke position role", () => {
+      const NOT_CREATE_OFFICIAL = "0xA83722f7d0223C5E0459B10776A15156408Be705";
+      const NOT_CREATED_DIVISION = "H31";
+
+      beforeEach(async function () {
+        const createOfficialTx = await documentManager
+          .connect(admin)
+          .createOfficial(
+            OFFICIAL_ADDRESS,
+            OFFICIAL_INFO,
+            DIVISION_ID,
+            ADMIN_POSITION_INDEX,
+            OFFICIAL_POSITION
+          );
+        await createOfficialTx.wait();
+      });
+
+      it("Should fail to revoke position role if official not created yet", async () => {
+        await expect(
+          documentManager
+            .connect(admin)
+            .revokePositionRole(
+              NOT_CREATE_OFFICIAL,
+              DIVISION_ID,
+              ADMIN_POSITION_INDEX,
+              FIRST_POSITION_INDEX
+            )
+        ).to.be.revertedWithCustomError(documentManager, "OfficialNotCreated");
+      });
+
+      it("Should fail to revoke position role if division not created yet", async () => {
+        await expect(
+          documentManager
+            .connect(admin)
+            .revokePositionRole(
+              OFFICIAL_ADDRESS,
+              NOT_CREATED_DIVISION,
+              ADMIN_POSITION_INDEX,
+              FIRST_POSITION_INDEX
+            )
+        ).to.be.revertedWithCustomError(documentManager, "DivisionNotCreated");
+      });
+
+      it("Should fail to revoke position role if position index invalid", async () => {
+        await expect(
+          documentManager.connect(admin).revokePositionRole(
+            OFFICIAL_ADDRESS,
+            DIVISION_ID,
+            ADMIN_POSITION_INDEX,
+            SECOND_POSITION_INDEX // out of positions array
+          )
+        ).to.be.revertedWithCustomError(documentManager, "PositionIndexOutOfRange");
+      });
+
+      it("Should succeed to revoke position role", async () => {
+        const updateNameTx = await documentManager
+          .connect(admin)
+          .revokePositionRole(
+            OFFICIAL_ADDRESS,
+            DIVISION_ID,
+            ADMIN_POSITION_INDEX,
+            FIRST_POSITION_INDEX
+          );
+
+        await updateNameTx.wait();
+
+        await expect(updateNameTx)
+          .to.emit(documentManager, "PositionRoleRevoked")
+          .withArgs(OFFICIAL_ADDRESS, DIVISION_ID, ADMIN_POSITION_INDEX, FIRST_POSITION_INDEX);
+        const { role } = await documentManager.getOfficialPosition(
+          OFFICIAL_ADDRESS,
+          DIVISION_ID,
+          FIRST_POSITION_INDEX
+        );
+
+        expect(role).to.be.equal(PositionRole.REVOKED);
       });
     });
   });

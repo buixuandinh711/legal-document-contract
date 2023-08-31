@@ -159,8 +159,8 @@ contract OfficialManager is DivisionManager, IOfficialManager {
         requireSystemAdminOrDivisionAdmin(divisionId, creatorPositionIndex);
 
         if (
-            newPositionRole != PositionRole.DIVISION_ADMIN ||
-            newPositionRole != PositionRole.MANAGER ||
+            newPositionRole != PositionRole.DIVISION_ADMIN &&
+            newPositionRole != PositionRole.MANAGER &&
             newPositionRole != PositionRole.STAFF
         ) revert InvalidUpdatedRole();
 
