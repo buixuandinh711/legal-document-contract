@@ -77,13 +77,14 @@ contract OfficialManager is DivisionManager, IOfficialManager {
         if (_officials[officialAddress].status != OfficialStatus.NOT_CREATED)
             revert OfficialAlreadyCreated();
 
-        _officials[officialAddress] = Official(info, OfficialStatus.ACTIVE);
-
-        if (
+         if (
             position.role != PositionRole.DIVISION_ADMIN &&
             position.role != PositionRole.MANAGER &&
             position.role != PositionRole.STAFF
         ) revert InvalidCreatedOfficialRole();
+
+        _officials[officialAddress] = Official(info, OfficialStatus.ACTIVE);
+
         uint256 positionIndex = _positions[officialAddress][divisionId].length;
         _positions[officialAddress][divisionId].push(position);
 
