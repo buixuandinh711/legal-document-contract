@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { LegalDocumentManager, LegalDocumentManager__factory } from "../typechain-types";
-import { DivisionStatus, OfficialStatus, PositionRole } from "../utils/contract.type";
+import { OfficialStatus, PositionRole } from "../utils/contract.type";
 import { Result } from "ethers";
 import { toEthersResult } from "../utils/utils";
 
