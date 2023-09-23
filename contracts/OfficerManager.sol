@@ -3,30 +3,30 @@
 pragma solidity 0.8.19;
 
 import "./DivisionManager.sol";
-import "./interfaces/IOfficialManager.sol";
+import "./interfaces/IOfficerManager.sol";
 
-contract OfficialManager is DivisionManager, IOfficialManager {
-    // official address => official info
-    mapping(address => Official) private _officials;
+contract OfficerManager is DivisionManager, IOfficerManager {
+    // officer address => officer info
+    mapping(address => Officer) private _officers;
 
-    // official address => divisionId => position id => position info
+    // officer address => divisionId => position index => position info
     mapping(address => mapping(string => Position[])) private _positions;
 
     //------------------------ Validate functions (for avoiding stack too deep) ----------------------------------/
-    function requireCreatedOfficial(address officialAddress) internal view {
-        if (_officials[officialAddress].status == OfficialStatus.NOT_CREATED) {
-            revert OfficialNotCreated();
+    function requireCreatedOfficer(address officerAddress) internal view {
+        if (_officers[officerAddress].status == OfficerStatus.NOT_CREATED) {
+            revert OfficerNotCreated();
         }
     }
 
     function requireValidPositionIndex(
-        address officialAddress,
+        address officerAddress,
         string calldata divisionId,
         uint256 positionIndex
     ) internal view {
-        requireCreatedOfficial(officialAddress);
+        requireCreatedOfficer(officerAddress);
         requireCreatedDivision(divisionId);
-        if (positionIndex >= _positions[officialAddress][divisionId].length) {
+        if (positionIndex >= _positions[officerAddress][divisionId].length) {
             revert PositionIndexOutOfRange();
         }
     }
@@ -42,7 +42,7 @@ contract OfficialManager is DivisionManager, IOfficialManager {
 
         requireValidPositionIndex(msg.sender, divisionId, creatorPositionIndex);
         if (
-            !(_officials[msg.sender].status == OfficialStatus.ACTIVE &&
+            !(_officers[msg.sender].status == OfficerStatus.ACTIVE &&
                 _positions[msg.sender][divisionId][creatorPositionIndex].role ==
                 PositionRole.DIVISION_ADMIN)
         ) {
@@ -56,7 +56,7 @@ contract OfficialManager is DivisionManager, IOfficialManager {
     ) internal view {
         requireValidPositionIndex(msg.sender, divisionId, positionIndex);
         if (
-            !(_officials[msg.sender].status == OfficialStatus.ACTIVE &&
+            !(_officers[msg.sender].status == OfficerStatus.ACTIVE &&
                 _positions[msg.sender][divisionId][positionIndex].role ==
                 PositionRole.MANAGER)
         ) {
@@ -65,31 +65,31 @@ contract OfficialManager is DivisionManager, IOfficialManager {
     }
 
     //------------------------ External functions ----------------------------------/
-    function createOfficial(
-        address officialAddress,
-        OfficialInfo calldata info,
+    function createOfficer(
+        address officerAddress,
+        OfficerInfo calldata info,
         string calldata divisionId,
         uint256 creatorPositionIndex,
         Position calldata position
     ) external override {
         requireSystemAdminOrDivisionAdmin(divisionId, creatorPositionIndex);
 
-        if (_officials[officialAddress].status != OfficialStatus.NOT_CREATED)
-            revert OfficialAlreadyCreated();
+        if (_officers[officerAddress].status != OfficerStatus.NOT_CREATED)
+            revert OfficerAlreadyCreated();
 
          if (
             position.role != PositionRole.DIVISION_ADMIN &&
             position.role != PositionRole.MANAGER &&
             position.role != PositionRole.STAFF
-        ) revert InvalidCreatedOfficialRole();
+        ) revert InvalidCreatedOfficerRole();
 
-        _officials[officialAddress] = Official(info, OfficialStatus.ACTIVE);
+        _officers[officerAddress] = Officer(info, OfficerStatus.ACTIVE);
 
-        uint256 positionIndex = _positions[officialAddress][divisionId].length;
-        _positions[officialAddress][divisionId].push(position);
+        uint256 positionIndex = _positions[officerAddress][divisionId].length;
+        _positions[officerAddress][divisionId].push(position);
 
-        emit OfficialCreated(
-            officialAddress,
+        emit OfficerCreated(
+            officerAddress,
             info,
             divisionId,
             creatorPositionIndex,
@@ -98,50 +98,50 @@ contract OfficialManager is DivisionManager, IOfficialManager {
         );
     }
 
-    function updateOfficialInfo(
-        address officialAddress,
-        OfficialInfo calldata info
+    function updateOfficerInfo(
+        address officerAddress,
+        OfficerInfo calldata info
     ) external override onlySystemAdmin {
-        requireCreatedOfficial(officialAddress);
+        requireCreatedOfficer(officerAddress);
 
-        Official storage official = _officials[officialAddress];
+        Officer storage officer = _officers[officerAddress];
 
-        official.info = info;
+        officer.info = info;
 
-        emit OfficialInfoUpdated(officialAddress, info);
+        emit OfficerInfoUpdated(officerAddress, info);
     }
 
-    function deactivateOfficial(
-        address officialAddress
+    function deactivateOfficer(
+        address officerAddress
     ) external override onlySystemAdmin {
-        if (_officials[officialAddress].status != OfficialStatus.ACTIVE)
-            revert OfficialNotActive();
-        _officials[officialAddress].status = OfficialStatus.DEACTIVATED;
-        emit OfficialDeactivated(officialAddress);
+        if (_officers[officerAddress].status != OfficerStatus.ACTIVE)
+            revert OfficerNotActive();
+        _officers[officerAddress].status = OfficerStatus.DEACTIVATED;
+        emit OfficerDeactivated(officerAddress);
     }
 
-    function reactivateOfficial(address officialAddress) external override {
-        if (_officials[officialAddress].status != OfficialStatus.DEACTIVATED)
-            revert OfficialNotDeactivated();
-        _officials[officialAddress].status = OfficialStatus.ACTIVE;
-        emit OfficialReactivated(officialAddress);
+    function reactivateOfficer(address officerAddress) external override {
+        if (_officers[officerAddress].status != OfficerStatus.DEACTIVATED)
+            revert OfficerNotDeactivated();
+        _officers[officerAddress].status = OfficerStatus.ACTIVE;
+        emit OfficerReactivated(officerAddress);
     }
 
     function updatePositionName(
-        address officialAddress,
+        address officerAddress,
         string calldata divisionId,
         uint256 creatorPositionIndex,
         uint256 positionIndex,
         string calldata newPositionName
     ) external override {
-        requireValidPositionIndex(officialAddress, divisionId, positionIndex);
+        requireValidPositionIndex(officerAddress, divisionId, positionIndex);
         requireSystemAdminOrDivisionAdmin(divisionId, creatorPositionIndex);
 
-        _positions[officialAddress][divisionId][positionIndex]
+        _positions[officerAddress][divisionId][positionIndex]
             .name = newPositionName;
 
         emit PositionNameUpdated(
-            officialAddress,
+            officerAddress,
             divisionId,
             creatorPositionIndex,
             positionIndex,
@@ -150,13 +150,13 @@ contract OfficialManager is DivisionManager, IOfficialManager {
     }
 
     function updatePositionRole(
-        address officialAddress,
+        address officerAddress,
         string calldata divisionId,
         uint256 creatorPositionIndex,
         uint256 positionIndex,
         PositionRole newPositionRole
     ) external override {
-        requireValidPositionIndex(officialAddress, divisionId, positionIndex);
+        requireValidPositionIndex(officerAddress, divisionId, positionIndex);
         requireSystemAdminOrDivisionAdmin(divisionId, creatorPositionIndex);
 
         if (
@@ -165,11 +165,11 @@ contract OfficialManager is DivisionManager, IOfficialManager {
             newPositionRole != PositionRole.STAFF
         ) revert InvalidUpdatedRole();
 
-        _positions[officialAddress][divisionId][positionIndex]
+        _positions[officerAddress][divisionId][positionIndex]
             .role = newPositionRole;
 
         emit PositionRoleUpdated(
-            officialAddress,
+            officerAddress,
             divisionId,
             creatorPositionIndex,
             positionIndex,
@@ -178,19 +178,19 @@ contract OfficialManager is DivisionManager, IOfficialManager {
     }
 
     function revokePositionRole(
-        address officialAddress,
+        address officerAddress,
         string calldata divisionId,
         uint256 creatorPositionIndex,
         uint256 positionIndex
     ) external override {
-        requireValidPositionIndex(officialAddress, divisionId, positionIndex);
+        requireValidPositionIndex(officerAddress, divisionId, positionIndex);
         requireSystemAdminOrDivisionAdmin(divisionId, creatorPositionIndex);
 
-        _positions[officialAddress][divisionId][positionIndex]
+        _positions[officerAddress][divisionId][positionIndex]
             .role = PositionRole.REVOKED;
 
         emit PositionRoleRevoked(
-            officialAddress,
+            officerAddress,
             divisionId,
             creatorPositionIndex,
             positionIndex
@@ -198,24 +198,24 @@ contract OfficialManager is DivisionManager, IOfficialManager {
     }
 
     //------------------------ Public functions ----------------------------------/
-    function getOfficialInfo(
-        address officialAddress
-    ) public view override returns (Official memory official) {
-        official = _officials[officialAddress];
+    function getOfficerInfo(
+        address officerAddress
+    ) public view override returns (Officer memory officer) {
+        officer = _officers[officerAddress];
     }
 
-    function getOfficialPosition(
-        address officialAddress,
+    function getOfficerPosition(
+        address officerAddress,
         string calldata divisionId,
         uint256 positionIndex
     ) public view override returns (Position memory position) {
-        position = _positions[officialAddress][divisionId][positionIndex];
+        position = _positions[officerAddress][divisionId][positionIndex];
     }
 
-    function getOfficialPositions(
-        address officialAddress,
+    function getOfficerPositions(
+        address officerAddress,
         string calldata divisionId
     ) public view returns (Position[] memory positions) {
-        positions = _positions[officialAddress][divisionId];
+        positions = _positions[officerAddress][divisionId];
     }
 }

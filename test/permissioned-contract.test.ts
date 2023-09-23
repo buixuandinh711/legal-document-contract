@@ -33,13 +33,13 @@ describe("AccountIngress", () => {
     const DIVISION_ID = "H26";
     const DIVISION_NAME = "UBND Hanoi";
 
-    const OFFICIAL_ADDRESS = "0x14BbEb5702533e67D9b309927807954E568041E5";
-    const OFFICIAL_INFO = {
+    const OFFICER_ADDRESS = "0x14BbEb5702533e67D9b309927807954E568041E5";
+    const OFFICER_INFO = {
       name: "Nguyen Van A",
       sex: "Male",
       dateOfBirth: "01/01/2001",
     };
-    const OFFICIAL_POSITION = {
+    const OFFICER_POSITION = {
       name: "President",
       role: PositionRole.STAFF,
     };
@@ -51,17 +51,17 @@ describe("AccountIngress", () => {
         .createDivision(DIVISION_ID, DIVISION_NAME, SUPERVISORY_DIV_ID);
       await createDivTx.wait();
 
-      const createOfficialTx = await documentManager
+      const createOfficerTx = await documentManager
         .connect(admin)
-        .createOfficial(
-          OFFICIAL_ADDRESS,
-          OFFICIAL_INFO,
+        .createOfficer(
+          OFFICER_ADDRESS,
+          OFFICER_INFO,
           DIVISION_ID,
           ADMIN_POSITION_INDEX,
-          OFFICIAL_POSITION
+          OFFICER_POSITION
         );
 
-      await createOfficialTx.wait();
+      await createOfficerTx.wait();
     });
 
     it("Should allow if called by system admin", async () => {
@@ -77,9 +77,9 @@ describe("AccountIngress", () => {
       expect(allowance).to.be.true;
     });
 
-    it("Should allow if transaction from active official to document manager", async () => {
+    it("Should allow if transaction from active officer to document manager", async () => {
       const allowance = await accountIngress.transactionAllowed.staticCall(
-        OFFICIAL_ADDRESS,
+        OFFICER_ADDRESS,
         documentManager,
         ONE_WEI,
         ONE_GWEI,
@@ -90,14 +90,14 @@ describe("AccountIngress", () => {
       expect(allowance).to.be.true;
     });
 
-    it("Should reject if transaction from deactivated official", async () => {
+    it("Should reject if transaction from deactivated officer", async () => {
       const deactivateTx = await documentManager
         .connect(admin)
-        .deactivateOfficial(OFFICIAL_ADDRESS);
+        .deactivateOfficer(OFFICER_ADDRESS);
       await deactivateTx.wait();
 
       const allowance = await accountIngress.transactionAllowed.staticCall(
-        OFFICIAL_ADDRESS,
+        OFFICER_ADDRESS,
         documentManager,
         ONE_WEI,
         ONE_GWEI,
@@ -110,7 +110,7 @@ describe("AccountIngress", () => {
 
     it("Should reject if transaction not to document manager", async () => {
       const allowance = await accountIngress.transactionAllowed.staticCall(
-        OFFICIAL_ADDRESS,
+        OFFICER_ADDRESS,
         other,
         ONE_WEI,
         ONE_GWEI,
