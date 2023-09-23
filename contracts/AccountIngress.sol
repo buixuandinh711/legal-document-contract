@@ -41,8 +41,8 @@ contract AccountIngress is IAccountIngress {
         }
 
         if (
-            _documentManager.getOfficialInfo(sender).status ==
-            OfficialStatus.ACTIVE
+            _documentManager.getOfficerInfo(sender).status ==
+            OfficerStatus.ACTIVE
         ) {
             if (target == address(_documentManager)) return true;
         }

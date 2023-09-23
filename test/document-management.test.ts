@@ -9,12 +9,12 @@ describe("LegalDocumentManager", () => {
   const SUPERVISORY_DIV_ID = "ROOT";
   const DIVISION_ID = "H26";
   const DIVISION_NAME = "UBND Hanoi";
-  const OFFICIAL_INFO = {
+  const OFFICER_INFO = {
     name: "Nguyen Van A",
     sex: "Male",
     dateOfBirth: "01/01/2001",
   };
-  const OFFICIAL_POSITION = {
+  const OFFICER_POSITION = {
     name: "President",
     role: PositionRole.MANAGER,
   };
@@ -46,12 +46,12 @@ describe("LegalDocumentManager", () => {
       .createDivision(DIVISION_ID, DIVISION_NAME, SUPERVISORY_DIV_ID);
     await createDivTx.wait();
 
-    const createManagerTx = await documentManager.createOfficial(
+    const createManagerTx = await documentManager.createOfficer(
       divisionManager,
-      OFFICIAL_INFO,
+      OFFICER_INFO,
       DIVISION_ID,
       ADMIN_POSITION_INDEX,
-      OFFICIAL_POSITION
+      OFFICER_POSITION
     );
     await createManagerTx.wait();
   });
@@ -68,7 +68,7 @@ describe("LegalDocumentManager", () => {
             documentSigners,
             signatures
           )
-      ).to.be.revertedWithCustomError(documentManager, "OfficialNotCreated");
+      ).to.be.revertedWithCustomError(documentManager, "OfficerNotCreated");
     });
 
     it("Should fail to submit document if division not created yet", async () => {
@@ -102,7 +102,7 @@ describe("LegalDocumentManager", () => {
     });
 
     it("Should fail to submit document if account not active", async () => {
-      const deactivateTx = await documentManager.connect(admin).deactivateOfficial(divisionManager);
+      const deactivateTx = await documentManager.connect(admin).deactivateOfficer(divisionManager);
       await deactivateTx.wait();
 
       await expect(
@@ -119,16 +119,16 @@ describe("LegalDocumentManager", () => {
     });
 
     it("Should fail to submit document if creator not have division manager role", async () => {
-      const createOfficialTx = await documentManager
+      const createOfficerTx = await documentManager
         .connect(admin)
-        .createOfficial(
+        .createOfficer(
           other,
           { name: "Nguyen Staff", sex: "Male", dateOfBirth: "01/01/2001" },
           DIVISION_ID,
           ADMIN_POSITION_INDEX,
           { name: "Admin", role: PositionRole.STAFF }
         );
-      await createOfficialTx.wait();
+      await createOfficerTx.wait();
 
       await expect(
         documentManager

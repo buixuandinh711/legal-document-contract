@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 
 import "./IDivisionManager.sol";
 
-enum OfficialStatus {
+enum OfficerStatus {
     NOT_CREATED,
     ACTIVE,
     DEACTIVATED
@@ -17,16 +17,16 @@ enum PositionRole {
     STAFF
 }
 
-interface IOfficialManager is IDivisionManager {
-    struct OfficialInfo {
+interface IOfficerManager is IDivisionManager {
+    struct OfficerInfo {
         string name;
         string sex;
         string dateOfBirth;
     }
 
-    struct Official {
-        OfficialInfo info;
-        OfficialStatus status;
+    struct Officer {
+        OfficerInfo info;
+        OfficerStatus status;
     }
 
     struct Position {
@@ -35,38 +35,38 @@ interface IOfficialManager is IDivisionManager {
     }
 
     //------------------------ Errors ----------------------------------/
-    error OfficialAlreadyCreated();
-    error OfficialNotCreated();
+    error OfficerAlreadyCreated();
+    error OfficerNotCreated();
     error NotSystemAdminOrDivisionAdmin();
-    error OfficialNotActive();
-    error OfficialNotDeactivated();
+    error OfficerNotActive();
+    error OfficerNotDeactivated();
     error PositionNotGranted();
     error InvalidUpdatedRole();
     error PositionIndexOutOfRange();
-    error InvalidCreatedOfficialRole();
+    error InvalidCreatedOfficerRole();
     error NotDivisionManager();
 
     //------------------------ Events ----------------------------------/
-    event OfficialCreated(
-        address indexed officialAddress,
-        OfficialInfo info,
+    event OfficerCreated(
+        address indexed officerAddress,
+        OfficerInfo info,
         string divisionId,
         uint256 creatorPositionIndex,
         uint256 positionIndex,
         Position position
     );
 
-    event OfficialInfoUpdated(
-        address indexed officialAddress,
-        OfficialInfo info
+    event OfficerInfoUpdated(
+        address indexed officerAddress,
+        OfficerInfo info
     );
 
-    event OfficialDeactivated(address indexed officialAddress);
+    event OfficerDeactivated(address indexed officerAddress);
     
-    event OfficialReactivated(address indexed officialAddress);
+    event OfficerReactivated(address indexed officerAddress);
 
     event PositionNameUpdated(
-        address indexed officialAddress,
+        address indexed officerAddress,
         string divisionId,
         uint256 creatorPositionIndex,
         uint256 positionIndex,
@@ -74,7 +74,7 @@ interface IOfficialManager is IDivisionManager {
     );
 
     event PositionRoleUpdated(
-        address indexed officialAddress,
+        address indexed officerAddress,
         string divisionId,
         uint256 creatorPositionIndex,
         uint256 positionIndex,
@@ -82,31 +82,31 @@ interface IOfficialManager is IDivisionManager {
     );
 
     event PositionRoleRevoked(
-        address indexed officialAddress,
+        address indexed officerAddress,
         string divisionId,
         uint256 creatorPositionIndex,
         uint256 positionIndex
     );
 
-    function createOfficial(
-        address officialAddress,
-        OfficialInfo calldata info,
+    function createOfficer(
+        address officerAddress,
+        OfficerInfo calldata info,
         string calldata divisionId,
         uint256 creatorPositionIndex,
         Position calldata position
     ) external;
 
-    function updateOfficialInfo(
-        address officialAddress,
-        OfficialInfo calldata info
+    function updateOfficerInfo(
+        address officerAddress,
+        OfficerInfo calldata info
     ) external;
 
-    function deactivateOfficial(address officialAddress) external;
+    function deactivateOfficer(address officerAddress) external;
 
-    function reactivateOfficial(address officialAddress) external;
+    function reactivateOfficer(address officerAddress) external;
 
     function updatePositionName(
-        address officialAddress,
+        address officerAddress,
         string calldata divisionId,
         uint256 creatorPositionIndex,
         uint256 positionIndex,
@@ -114,7 +114,7 @@ interface IOfficialManager is IDivisionManager {
     ) external;
 
     function updatePositionRole(
-        address officialAddress,
+        address officerAddress,
         string calldata divisionId,
         uint256 creatorPositionIndex,
         uint256 positionIndex,
@@ -122,24 +122,24 @@ interface IOfficialManager is IDivisionManager {
     ) external;
 
     function revokePositionRole(
-        address officialAddress,
+        address officerAddress,
         string calldata divisionId,
         uint256 creatorPositionIndex,
         uint256 positionIndex
     ) external;
 
-    function getOfficialInfo(
-        address officialAddress
-    ) external view returns (Official memory official);
+    function getOfficerInfo(
+        address officerAddress
+    ) external view returns (Officer memory officer);
 
-    function getOfficialPosition(
-        address officialAddress,
+    function getOfficerPosition(
+        address officerAddress,
         string calldata divisionId,
         uint256 positionIndex
     ) external view returns (Position memory position);
 
-    function getOfficialPositions(
-        address officialAddress,
+    function getOfficerPositions(
+        address officerAddress,
         string calldata divisionId
     ) external view returns (Position[] memory positions);
 }

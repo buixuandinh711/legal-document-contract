@@ -11,7 +11,7 @@ export enum PositionRole {
   STAFF
 }
 
-export enum OfficialStatus {
+export enum OfficerStatus {
   NOT_CREATED,
   ACTIVE,
   DEACTIVATED
