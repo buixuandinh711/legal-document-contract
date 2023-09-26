@@ -40,9 +40,9 @@ describe("OfficerManager", () => {
 
   describe("Call by admin", () => {
     describe("Create officer", () => {
-      const NOT_CREATED_DIVISION = "H30";
-
       it("Should fail if division not created yet", async () => {
+        const NOT_CREATED_DIVISION = "H30";
+
         await expect(
           documentManager
             .connect(admin)
@@ -53,7 +53,23 @@ describe("OfficerManager", () => {
               ADMIN_POSITION_INDEX,
               OFFICER_POSITION
             )
-        ).to.be.revertedWithCustomError(documentManager, "DivisionNotCreated");
+        ).to.be.revertedWithCustomError(documentManager, "DivisionNotActive");
+      });
+
+      it("Should fail if division already deactivated", async () => {
+        await documentManager.connect(admin).deactivateDivision(DIVISION_ID);
+
+        await expect(
+          documentManager
+            .connect(admin)
+            .createOfficer(
+              OFFICER_ADDRESS,
+              OFFICER_INFO,
+              DIVISION_ID,
+              ADMIN_POSITION_INDEX,
+              OFFICER_POSITION
+            )
+        ).to.be.revertedWithCustomError(documentManager, "DivisionNotActive");
       });
 
       it("Should fail if create with invalid role", async () => {
@@ -315,7 +331,7 @@ describe("OfficerManager", () => {
               FIRST_POSITION_INDEX,
               NEW_POSITION_NAME
             )
-        ).to.be.revertedWithCustomError(documentManager, "DivisionNotCreated");
+        ).to.be.revertedWithCustomError(documentManager, "DivisionNotActive");
       });
 
       it("Should fail to update officer name if position index invalid", async () => {
@@ -405,7 +421,7 @@ describe("OfficerManager", () => {
               FIRST_POSITION_INDEX,
               NEW_POSITION_ROLE
             )
-        ).to.be.revertedWithCustomError(documentManager, "DivisionNotCreated");
+        ).to.be.revertedWithCustomError(documentManager, "DivisionNotActive");
       });
 
       it("Should fail to update officer role if position index invalid", async () => {
@@ -506,7 +522,7 @@ describe("OfficerManager", () => {
               ADMIN_POSITION_INDEX,
               FIRST_POSITION_INDEX
             )
-        ).to.be.revertedWithCustomError(documentManager, "DivisionNotCreated");
+        ).to.be.revertedWithCustomError(documentManager, "DivisionNotActive");
       });
 
       it("Should fail to revoke position role if position index invalid", async () => {
@@ -595,7 +611,7 @@ describe("OfficerManager", () => {
               DIV_ADMIN_POSITION_INDEX,
               OFFICER_POSITION
             )
-        ).to.be.revertedWithCustomError(documentManager, "DivisionNotCreated");
+        ).to.be.revertedWithCustomError(documentManager, "DivisionNotActive");
       });
 
       it("Should fail to create officer if creator position index invalid", async () => {
@@ -659,16 +675,10 @@ describe("OfficerManager", () => {
         await expect(
           documentManager
             .connect(divisionAdmin)
-            .createOfficer(
-              OFFICER_ADDRESS,
-              OFFICER_INFO,
-              DIVISION_ID,
-              DIV_ADMIN_POSITION_INDEX,
-              {
-                name: "President",
-                role: PositionRole.REVOKED,
-              }
-            )
+            .createOfficer(OFFICER_ADDRESS, OFFICER_INFO, DIVISION_ID, DIV_ADMIN_POSITION_INDEX, {
+              name: "President",
+              role: PositionRole.REVOKED,
+            })
         ).to.be.revertedWithCustomError(documentManager, "InvalidCreatedOfficerRole");
       });
 
@@ -779,7 +789,7 @@ describe("OfficerManager", () => {
               FIRST_POSITION_INDEX,
               POSITION_NEW_NAME
             )
-        ).to.be.revertedWithCustomError(documentManager, "DivisionNotCreated");
+        ).to.be.revertedWithCustomError(documentManager, "DivisionNotActive");
       });
 
       it("Should fail to update officer name if position index invalid", async () => {
@@ -942,7 +952,7 @@ describe("OfficerManager", () => {
               FIRST_POSITION_INDEX,
               POSITION_NEW_ROLE
             )
-        ).to.be.revertedWithCustomError(documentManager, "DivisionNotCreated");
+        ).to.be.revertedWithCustomError(documentManager, "DivisionNotActive");
       });
 
       it("Should fail to update officer role if position index invalid", async () => {
@@ -1116,7 +1126,7 @@ describe("OfficerManager", () => {
               DIV_ADMIN_POSITION_INDEX,
               FIRST_POSITION_INDEX
             )
-        ).to.be.revertedWithCustomError(documentManager, "DivisionNotCreated");
+        ).to.be.revertedWithCustomError(documentManager, "DivisionNotActive");
       });
 
       it("Should fail to revoke position role if position index invalid", async () => {

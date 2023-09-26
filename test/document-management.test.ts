@@ -71,7 +71,7 @@ describe("LegalDocumentManager", () => {
       ).to.be.revertedWithCustomError(documentManager, "OfficerNotCreated");
     });
 
-    it("Should fail to submit document if division not created yet", async () => {
+    it("Should fail to submit document if division not active", async () => {
       const NOT_CREATED_DIVISION = "H31";
 
       await expect(
@@ -84,7 +84,7 @@ describe("LegalDocumentManager", () => {
             documentSigners,
             signatures
           )
-      ).to.be.revertedWithCustomError(documentManager, "DivisionNotCreated");
+      ).to.be.revertedWithCustomError(documentManager, "DivisionNotActive");
     });
 
     it("Should fail to submit document if position index invalid", async () => {

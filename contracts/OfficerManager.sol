@@ -25,7 +25,7 @@ contract OfficerManager is DivisionManager, IOfficerManager {
         uint256 positionIndex
     ) internal view {
         requireCreatedOfficer(officerAddress);
-        requireCreatedDivision(divisionId);
+        requireActiveDivision(divisionId);
         if (positionIndex >= _positions[officerAddress][divisionId].length) {
             revert PositionIndexOutOfRange();
         }
@@ -36,7 +36,7 @@ contract OfficerManager is DivisionManager, IOfficerManager {
         uint256 creatorPositionIndex
     ) internal view {
         if (msg.sender == getSystemAdmin()) {
-            requireCreatedDivision(divisionId);
+            requireActiveDivision(divisionId);
             return;
         }
 
@@ -77,7 +77,7 @@ contract OfficerManager is DivisionManager, IOfficerManager {
         if (_officers[officerAddress].status != OfficerStatus.NOT_CREATED)
             revert OfficerAlreadyCreated();
 
-         if (
+        if (
             position.role != PositionRole.DIVISION_ADMIN &&
             position.role != PositionRole.MANAGER &&
             position.role != PositionRole.STAFF
@@ -135,7 +135,7 @@ contract OfficerManager is DivisionManager, IOfficerManager {
         string calldata newPositionName
     ) external override {
         requireValidPositionIndex(officerAddress, divisionId, positionIndex);
-        requireSystemAdminOrDivisionAdmin(divisionId, creatorPositionIndex);
+        requireSystemAdminOrDivisionAdmin(divisionId, updaterPositionIndex);
 
         _positions[officerAddress][divisionId][positionIndex]
             .name = newPositionName;

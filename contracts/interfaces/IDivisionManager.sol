@@ -18,7 +18,6 @@ interface IDivisionManager is ISystemAdminMananger {
     }
 
     error DivisionAlreadyCreated();
-    error DivisionNotCreated();
     error DivisionNotActive();
     error DivisionNotDeactivated();
 

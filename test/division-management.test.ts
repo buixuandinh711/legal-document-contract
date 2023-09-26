@@ -81,7 +81,7 @@ describe("DivisionManager", () => {
     it("Should fail if update not created division", async () => {
       await expect(
         documentManager.connect(admin).updateDivision(DIVISION_ID, NEW_NAME, NEW_SUPERVISORY_ID)
-      ).to.be.revertedWithCustomError(documentManager, "DivisionNotCreated");
+      ).to.be.revertedWithCustomError(documentManager, "DivisionNotActive");
     });
 
     it("Should succeed to update division info", async () => {
@@ -161,12 +161,6 @@ describe("DivisionManager", () => {
       await expect(
         documentManager.connect(other).reactivateDivision(DIVISION_ID)
       ).to.be.revertedWithCustomError(documentManager, "NotTheSystemAdmin");
-    });
-
-    it("Should fail if reactivate not created division", async () => {
-      await expect(
-        documentManager.connect(admin).deactivateDivision(DIVISION_ID)
-      ).to.be.revertedWithCustomError(documentManager, "DivisionNotActive");
     });
 
     it("Should succeed to reactivate division", async () => {
