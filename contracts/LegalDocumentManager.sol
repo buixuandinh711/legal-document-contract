@@ -2,11 +2,11 @@
 
 pragma solidity 0.8.19;
 
-import "./OfficerManager.sol";
 import "./interfaces/ILegalDocumentManager.sol";
+import "./PositionManager.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-contract LegalDocumentManager is OfficerManager, ILegalDocumentManager {
+contract LegalDocumentManager is ILegalDocumentManager, PositionManager {
     function submitDocument(
         string calldata divisionId,
         uint256 positionIndex,

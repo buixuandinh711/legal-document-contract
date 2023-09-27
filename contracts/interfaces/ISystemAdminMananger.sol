@@ -5,7 +5,6 @@ pragma solidity 0.8.19;
 interface ISystemAdminMananger {
 
     error NotTheSystemAdmin();
-
     event SystemAdminUpdated(address indexed newSystemAdmin);
 
     function updateSystemAdmin(address newSystemAdmin) external;

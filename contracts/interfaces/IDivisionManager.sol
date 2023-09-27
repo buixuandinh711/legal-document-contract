@@ -20,6 +20,8 @@ interface IDivisionManager is ISystemAdminMananger {
     error DivisionAlreadyCreated();
     error DivisionNotActive();
     error DivisionNotDeactivated();
+    error DivisionNotCreated();
+    error SupervisoryDivisionNotActive();
 
     event DivisionCreated(
         string divisionId,
@@ -27,11 +29,7 @@ interface IDivisionManager is ISystemAdminMananger {
         string supervisoryDivId
     );
 
-    event DivisionUpdated(
-        string divisionId,
-        string newName,
-        string newSupervisoryDivId
-    );
+    event DivisionNameUpdated(string divisionId, string newName);
 
     event DivisionDeactivated(string divisionId);
     event DivisionReactivated(string divisionId);
@@ -42,10 +40,9 @@ interface IDivisionManager is ISystemAdminMananger {
         string calldata supervisoryDivId
     ) external;
 
-    function updateDivision(
+    function updateDivisionName(
         string calldata divisionId,
-        string calldata name,
-        string calldata supervisoryDivId
+        string calldata name
     ) external;
 
     function deactivateDivision(string calldata divisionId) external;

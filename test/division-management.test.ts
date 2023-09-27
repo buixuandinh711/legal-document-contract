@@ -74,24 +74,24 @@ describe("DivisionManager", () => {
 
     it("Should fail if not updated by admin", async () => {
       await expect(
-        documentManager.connect(other).updateDivision(DIVISION_ID, NEW_NAME, NEW_SUPERVISORY_ID)
+        documentManager.connect(other).updateDivisionName(DIVISION_ID, NEW_NAME, NEW_SUPERVISORY_ID)
       ).to.be.revertedWithCustomError(documentManager, "NotTheSystemAdmin");
     });
 
     it("Should fail if update not created division", async () => {
       await expect(
-        documentManager.connect(admin).updateDivision(DIVISION_ID, NEW_NAME, NEW_SUPERVISORY_ID)
+        documentManager.connect(admin).updateDivisionName(DIVISION_ID, NEW_NAME, NEW_SUPERVISORY_ID)
       ).to.be.revertedWithCustomError(documentManager, "DivisionNotActive");
     });
 
     it("Should succeed to update division info", async () => {
       const tx = await documentManager
         .connect(admin)
-        .updateDivision(DIVISION_ID, NEW_NAME, NEW_SUPERVISORY_ID);
+        .updateDivisionName(DIVISION_ID, NEW_NAME, NEW_SUPERVISORY_ID);
       await tx.wait();
 
       await expect(tx)
-        .to.emit(documentManager, "DivisionUpdated")
+        .to.emit(documentManager, "DivisionNameUpdated")
         .withArgs(DIVISION_ID, NEW_NAME, NEW_SUPERVISORY_ID);
 
       const { name, supervisoryDivId } = await documentManager.getDivision(DIVISION_ID);
