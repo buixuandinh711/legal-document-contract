@@ -40,6 +40,7 @@ contract PositionManager is
 
         if (positionIndex == ADMIN_POSITION_INDEX) {
             requireSystemAdmin();
+            return;
         }
 
         requireActiveDivision(divisionId);

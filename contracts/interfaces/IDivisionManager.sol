@@ -21,7 +21,7 @@ interface IDivisionManager is ISystemAdminMananger {
     error DivisionNotActive();
     error DivisionNotDeactivated();
     error DivisionNotCreated();
-    error SupervisoryDivisionNotActive();
+    error InvalidSupervisoryDivisionId();
 
     event DivisionCreated(
         string divisionId,

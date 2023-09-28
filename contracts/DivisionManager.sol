@@ -6,6 +6,8 @@ import "./SystemAdminManger.sol";
 import "./interfaces/IDivisionManager.sol";
 
 contract DivisionManager is IDivisionManager, SystemAdminManger {
+    string private constant ROOT_DIVISION_ID = "";
+
     // divisionId to division's info
     mapping(string => Division) private _divisions;
 
@@ -31,8 +33,11 @@ contract DivisionManager is IDivisionManager, SystemAdminManger {
         if (_divisions[divisionId].status != DivisionStatus.NOT_CREATED)
             revert DivisionAlreadyCreated();
 
-        if (_divisions[supervisoryDivId].status != DivisionStatus.ACTIVE)
-            revert SupervisoryDivisionNotActive();
+        if (
+            keccak256(abi.encodePacked(supervisoryDivId)) !=
+            keccak256(abi.encodePacked(ROOT_DIVISION_ID)) &&
+            _divisions[supervisoryDivId].status != DivisionStatus.ACTIVE
+        ) revert InvalidSupervisoryDivisionId();
 
         _divisions[divisionId] = Division(
             DivisionStatus.ACTIVE,
