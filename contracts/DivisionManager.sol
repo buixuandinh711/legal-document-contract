@@ -5,11 +5,19 @@ pragma solidity 0.8.19;
 import "./SystemAdminManger.sol";
 import "./interfaces/IDivisionManager.sol";
 
-contract DivisionManager is SystemAdminManger, IDivisionManager {
+contract DivisionManager is IDivisionManager, SystemAdminManger {
+    string private constant ROOT_DIVISION_ID = "";
+
     // divisionId to division's info
     mapping(string => Division) private _divisions;
 
     //------------------------ Validate functions (for avoiding stack too deep) ----------------------------------/
+
+    function requireCreatedDivision(string calldata divisionId) internal view {
+        if (_divisions[divisionId].status != DivisionStatus.ACTIVE)
+            revert DivisionNotCreated();
+    }
+
     function requireActiveDivision(string calldata divisionId) internal view {
         if (_divisions[divisionId].status != DivisionStatus.ACTIVE)
             revert DivisionNotActive();
@@ -19,9 +27,17 @@ contract DivisionManager is SystemAdminManger, IDivisionManager {
         string calldata divisionId,
         string calldata name,
         string calldata supervisoryDivId
-    ) external override onlySystemAdmin {
+    ) external override {
+        requireSystemAdmin();
+
         if (_divisions[divisionId].status != DivisionStatus.NOT_CREATED)
             revert DivisionAlreadyCreated();
+
+        if (
+            keccak256(abi.encodePacked(supervisoryDivId)) !=
+            keccak256(abi.encodePacked(ROOT_DIVISION_ID)) &&
+            _divisions[supervisoryDivId].status != DivisionStatus.ACTIVE
+        ) revert InvalidSupervisoryDivisionId();
 
         _divisions[divisionId] = Division(
             DivisionStatus.ACTIVE,
@@ -32,41 +48,36 @@ contract DivisionManager is SystemAdminManger, IDivisionManager {
         emit DivisionCreated(divisionId, name, supervisoryDivId);
     }
 
-    function updateDivision(
+    function updateDivisionName(
         string calldata divisionId,
-        string calldata newName,
-        string calldata newSupervisoryDivId
-    ) external override onlySystemAdmin {
-        requireActiveDivision(divisionId);
+        string calldata newName
+    ) external override {
+        requireSystemAdmin();
+        requireCreatedDivision(divisionId);
 
         Division storage currentInfo = _divisions[divisionId];
 
         currentInfo.name = newName;
-        currentInfo.supervisoryDivId = newSupervisoryDivId;
 
-        emit DivisionUpdated(divisionId, newName, newSupervisoryDivId);
+        emit DivisionNameUpdated(divisionId, newName);
     }
 
-    function deactivateDivision(
-        string calldata divisionId
-    ) external override onlySystemAdmin {
+    function deactivateDivision(string calldata divisionId) external override {
+        requireSystemAdmin();
         requireActiveDivision(divisionId);
 
-        Division storage currentInfo = _divisions[divisionId];
-        currentInfo.status = DivisionStatus.DEACTIVATED;
+        _divisions[divisionId].status = DivisionStatus.DEACTIVATED;
 
         emit DivisionDeactivated(divisionId);
     }
 
-    function reactivateDivision(
-        string calldata divisionId
-    ) external override onlySystemAdmin {
-        Division storage currentInfo = _divisions[divisionId];
+    function reactivateDivision(string calldata divisionId) external override {
+        requireSystemAdmin();
 
-        if (currentInfo.status != DivisionStatus.DEACTIVATED)
+        if (_divisions[divisionId].status != DivisionStatus.DEACTIVATED)
             revert DivisionNotDeactivated();
 
-        currentInfo.status = DivisionStatus.ACTIVE;
+        _divisions[divisionId].status = DivisionStatus.ACTIVE;
 
         emit DivisionReactivated(divisionId);
     }

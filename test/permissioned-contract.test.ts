@@ -7,8 +7,7 @@ import {
   LegalDocumentManager,
   LegalDocumentManager__factory,
 } from "../typechain-types";
-import { ONE_GWEI, ONE_WEI } from "../utils/utils";
-import { PositionRole } from "../utils/contract.type";
+import { ONE_GWEI, ONE_WEI, ROOT_DIVISION_ID } from "../utils/utils";
 
 describe("AccountIngress", () => {
   const GAS_LIMIT = 1e5;
@@ -29,7 +28,6 @@ describe("AccountIngress", () => {
   });
 
   describe("Transaction allowance", () => {
-    const SUPERVISORY_DIV_ID = "ROOT";
     const DIVISION_ID = "H26";
     const DIVISION_NAME = "UBND Hanoi";
 
@@ -39,27 +37,16 @@ describe("AccountIngress", () => {
       sex: "Male",
       dateOfBirth: "01/01/2001",
     };
-    const OFFICER_POSITION = {
-      name: "President",
-      role: PositionRole.STAFF,
-    };
-    const ADMIN_POSITION_INDEX = 0;
 
     beforeEach(async () => {
       const createDivTx = await documentManager
         .connect(admin)
-        .createDivision(DIVISION_ID, DIVISION_NAME, SUPERVISORY_DIV_ID);
+        .createDivision(DIVISION_ID, DIVISION_NAME, ROOT_DIVISION_ID);
       await createDivTx.wait();
 
       const createOfficerTx = await documentManager
         .connect(admin)
-        .createOfficer(
-          OFFICER_ADDRESS,
-          OFFICER_INFO,
-          DIVISION_ID,
-          ADMIN_POSITION_INDEX,
-          OFFICER_POSITION
-        );
+        .createOfficer(OFFICER_ADDRESS, OFFICER_INFO);
 
       await createOfficerTx.wait();
     });
@@ -91,9 +78,7 @@ describe("AccountIngress", () => {
     });
 
     it("Should reject if transaction from deactivated officer", async () => {
-      const deactivateTx = await documentManager
-        .connect(admin)
-        .deactivateOfficer(OFFICER_ADDRESS);
+      const deactivateTx = await documentManager.connect(admin).deactivateOfficer(OFFICER_ADDRESS);
       await deactivateTx.wait();
 
       const allowance = await accountIngress.transactionAllowed.staticCall(
