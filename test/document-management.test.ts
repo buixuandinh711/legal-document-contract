@@ -57,6 +57,20 @@ describe("LegalDocumentManager", () => {
       .connect(admin)
       .createPosition(divisionManager, DIVISION_ID, MANAGER_POSITION, ADMIN_POSITION_INDEX);
     await createManagerPositionTx.wait();
+
+    const createSigner1Tx = await documentManager.createOfficer(signer1, {
+      name: "Nguyen A",
+      dateOfBirth: "1999",
+      sex: "Male",
+    });
+    await createSigner1Tx.wait();
+
+    const createSigner2Tx = await documentManager.createOfficer(signer2, {
+      name: "Nguyen B",
+      dateOfBirth: "1999",
+      sex: "Male",
+    });
+    await createSigner2Tx.wait();
   });
 
   describe("Submit document", () => {
@@ -179,6 +193,23 @@ describe("LegalDocumentManager", () => {
             invalidSignatures
           )
       ).to.be.revertedWithCustomError(documentManager, "InvalidSignature");
+    });
+
+    it("Should fail to submit document if any signer is not active", async () => {
+      const deactivateTx = await documentManager.connect(admin).deactivateOfficer(signer1);
+      await deactivateTx.wait();
+
+      await expect(
+        documentManager
+          .connect(divisionManager)
+          .submitDocument(
+            DIVISION_ID,
+            FIRST_POSITION_INDEX,
+            DOCUMENT_CONTENT,
+            documentSigners,
+            signatures
+          )
+      ).to.be.revertedWithCustomError(documentManager, "OfficerNotActive");
     });
 
     it("Should succeed to submit document", async () => {

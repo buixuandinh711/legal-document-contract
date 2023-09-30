@@ -16,7 +16,7 @@ contract OfficerManager is IOfficerManager, SystemAdminManger {
         }
     }
 
-    function requireActivevOfficer(address officerAddress) internal view {
+    function requireActiveOfficer(address officerAddress) internal view {
         if (_officers[officerAddress].status != OfficerStatus.ACTIVE) {
             revert OfficerNotActive();
         }
@@ -51,7 +51,7 @@ contract OfficerManager is IOfficerManager, SystemAdminManger {
 
     function deactivateOfficer(address officerAddress) external override {
         requireSystemAdmin();
-        requireActivevOfficer(officerAddress);
+        requireActiveOfficer(officerAddress);
 
         _officers[officerAddress].status = OfficerStatus.DEACTIVATED;
         emit OfficerDeactivated(officerAddress);

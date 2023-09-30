@@ -44,7 +44,7 @@ contract PositionManager is
         }
 
         requireActiveDivision(divisionId);
-        requireActivevOfficer(sender);
+        requireActiveOfficer(sender);
         requireValidPositionIndex(sender, divisionId, positionIndex);
 
         if (
@@ -60,7 +60,7 @@ contract PositionManager is
         address sender = msg.sender;
 
         requireActiveDivision(divisionId);
-        requireActivevOfficer(sender);
+        requireActiveOfficer(sender);
         requireValidPositionIndex(sender, divisionId, positionIndex);
 
         if (
@@ -76,7 +76,7 @@ contract PositionManager is
         uint256 creatorPositionIndex
     ) external override {
         requireSystemAdminOrDivisionAdmin(divisionId, creatorPositionIndex);
-        requireActivevOfficer(officerAddress);
+        requireActiveOfficer(officerAddress);
         requireActiveDivision(divisionId);
 
         if (

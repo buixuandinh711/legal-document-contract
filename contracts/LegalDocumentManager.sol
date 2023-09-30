@@ -22,6 +22,7 @@ contract LegalDocumentManager is ILegalDocumentManager, PositionManager {
         bytes32 signedHash = ECDSA.toEthSignedMessageHash(documentHash);
 
         for (uint256 i = 0; i < signers.length; i++) {
+            requireActiveOfficer(signers[i]);
             bytes calldata signature = signatures[i * 65:(i + 1) * 65];
             address recoveredSigner = ECDSA.recover(signedHash, signature);
             if (recoveredSigner != signers[i]) {
