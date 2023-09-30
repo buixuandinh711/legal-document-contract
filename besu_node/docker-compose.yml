@@ -1,0 +1,20 @@
+version: "3.6"
+
+services:
+  besu-node:
+    image: hyperledger/besu:latest
+    restart: "on-failure"
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        /opt/besu/bin/besu \
+        --config-file=/config/config.toml \
+
+    ports:
+      - "8545:8545"
+      - "30303:30303"
+      - "9545:9545"
+    volumes:
+      - ./config:/config
+      - ./keys:/opt/besu/keys
