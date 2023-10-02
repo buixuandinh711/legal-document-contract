@@ -6,7 +6,7 @@ import "./SystemAdminManger.sol";
 import "./interfaces/IDivisionManager.sol";
 
 contract DivisionManager is IDivisionManager, SystemAdminManger {
-    string private constant ROOT_DIVISION_ID = "";
+    string private constant ROOT_DIVISION_ID = "ROOT";
 
     // divisionId to division's info
     mapping(string => Division) private _divisions;

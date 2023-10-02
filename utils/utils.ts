@@ -9,7 +9,7 @@ export const toEthersResult = (obj: any) => {
 
 export const ONE_WEI = 1n;
 export const ONE_GWEI = 1e9;
-export const ROOT_DIVISION_ID = "";
+export const ROOT_DIVISION_ID = "ROOT";
 export const MAX_POSITION_INDEX = 1000;
 export const ADMIN_POSITION_INDEX = 1001;
 
