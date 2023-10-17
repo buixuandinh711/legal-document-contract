@@ -3,7 +3,7 @@ version: "3.6"
 services:
   besu-node:
     image: hyperledger/besu:latest
-    restart: "on-failure"
+    restart: "no"
     entrypoint:
       - /bin/bash
       - -c
