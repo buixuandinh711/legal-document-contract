@@ -4,21 +4,36 @@ pragma solidity 0.8.19;
 import "./IPositionManager.sol";
 
 interface ILegalDocumentManager is IPositionManager {
+    struct DocumentInfo {
+        string number;
+        string name;
+        string divisionId;
+        uint256 publishedTimestamp;
+    }
+
+    struct PublishedDocument {
+        DocumentInfo info;
+        OfficerPosition publisher;
+        OfficerPosition[] signers;
+    }
+
     error SignersSignaturesLengthNotMatch();
     error InvalidSignature();
+    error DocumentAlreadlyPublished();
 
-    event DocumentSubmitted(
-        bytes32 indexed documentHash,
-        string divisionId,
-        uint256 positionIndex,
-        address[] signers
+    event DocumentPublished(
+        bytes32 indexed documentContentHash,
+        DocumentInfo documentInfo,
+        OfficerPosition publisher,
+        OfficerPosition[] signers
     );
 
-    function submitDocument(
+    function publishDocument(
         string calldata divisionId,
-        uint256 positionIndex,
+        uint256 publisherPositionIndex,
+        DocumentInfo calldata documentInfo,
         bytes calldata documentContent,
-        address[] calldata signers,
+        OfficerPosition[] calldata signers,
         bytes calldata signatures
     ) external;
 }

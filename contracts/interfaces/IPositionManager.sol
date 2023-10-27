@@ -23,6 +23,12 @@ interface IPositionManager is
         PositionRole role;
     }
 
+      struct OfficerPosition {
+        address officerAddress;
+        string divisionId;
+        uint256 positionIndex;
+    }
+
     //------------------------ Errors ----------------------------------/
 
     error PositionIndexOutOfRange();
@@ -31,6 +37,7 @@ interface IPositionManager is
     error InvalidCreatedPositionRole();
     error InvalidUpdateddPositionRole();
     error NotTheDivisionManager();
+    error NotTheValidSigner();
 
     //------------------------ Events ----------------------------------/
 

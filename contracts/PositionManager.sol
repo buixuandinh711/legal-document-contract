@@ -69,6 +69,27 @@ contract PositionManager is
         ) revert NotTheDivisionManager();
     }
 
+    function requireValidSigner(
+        OfficerPosition calldata officerPosition
+    ) internal view {
+        requireActiveDivision(officerPosition.divisionId);
+        requireActiveOfficer(officerPosition.officerAddress);
+        requireValidPositionIndex(
+            officerPosition.officerAddress,
+            officerPosition.divisionId,
+            officerPosition.positionIndex
+        );
+
+        PositionRole positionRole = _positions[officerPosition.officerAddress][
+            officerPosition.divisionId
+        ][officerPosition.positionIndex].role;
+
+        if (
+            positionRole != PositionRole.MANAGER &&
+            positionRole != PositionRole.STAFF
+        ) revert NotTheValidSigner();
+    }
+
     function createPosition(
         address officerAddress,
         string calldata divisionId,
