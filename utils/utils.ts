@@ -1,5 +1,5 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import { Result } from "ethers";
+import { BytesLike, Result } from "ethers";
 import { ethers } from "hardhat";
 import { DocumentInfo, OfficerPosition } from "./contract.type";
 
@@ -17,7 +17,7 @@ export const [FIRST_POSITION_INDEX, SECOND_POSITION_INDEX] = [0n, 1n];
 
 export const signDocument = async (
   documentInfo: DocumentInfo,
-  documentContent: string,
+  documentContent: BytesLike,
   signersPosition: OfficerPosition[],
   signers: SignerWithAddress[]
 ): Promise<string> => {

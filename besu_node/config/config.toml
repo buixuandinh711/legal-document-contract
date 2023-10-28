@@ -15,7 +15,7 @@ permissions-accounts-contract-address = "000000000000000000000000000000000000010
 
 # rpc
 rpc-http-enabled = true # default false, needed
-rpc-http-max-request-content-length = 10240
+rpc-http-max-request-content-length = 9999999
 rpc-http-host = "0.0.0.0" # optional
 rpc-http-port = 8545
 rpc-http-cors-origins = ["*"]
