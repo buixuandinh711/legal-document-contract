@@ -35,6 +35,7 @@ export const signDocument = async (
       ethers.toBeHex(position.positionIndex, 32),
       ethers.toUtf8Bytes(documentInfo.number),
       ethers.toUtf8Bytes(documentInfo.name),
+      ethers.toUtf8Bytes(documentInfo.docType),
       ethers.toUtf8Bytes(documentInfo.divisionId),
       ethers.toBeHex(documentInfo.publishedTimestamp, 32),
       documentContentHash,

@@ -5,7 +5,16 @@ import "hardhat-log-remover";
 // import "hardhat-tracer";
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.19",
+  solidity: {
+    version: "0.8.19",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 1000,
+      },
+      // viaIR: true,
+    },
+  },
   networks: {
     mumbai: {
       url: "https://polygon-mumbai.g.alchemy.com/v2/zP7ONa57Y0dtexURJSfRC0e49JVM-qeO",

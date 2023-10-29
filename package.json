@@ -7,7 +7,8 @@
     "compile": "hardhat compile",
     "clean": "hardhat clean",
     "test": "hardhat test",
-    "check-solhint": "solhint contracts/*.sol"
+    "check-solhint": "solhint contracts/*.sol",
+    "setup": "hardhat run scripts/setup.ts --network besu"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",

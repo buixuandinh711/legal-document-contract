@@ -10,11 +10,11 @@ contract LegalDocumentManager is ILegalDocumentManager, PositionManager {
     mapping(bytes32 => PublishedDocument) _publishedDocuments; //documentContentHash => publication info
 
     function publishDocument(
-        string calldata divisionId,
+        string memory divisionId,
         uint256 publisherPositionIndex,
         DocumentInfo memory documentInfo,
         bytes calldata documentContent,
-        OfficerPosition[] calldata signers,
+        OfficerPosition[] memory signers,
         bytes calldata signatures
     ) external override {
         requireDivisionManager(divisionId, publisherPositionIndex);
@@ -34,6 +34,7 @@ contract LegalDocumentManager is ILegalDocumentManager, PositionManager {
                 signers[i].positionIndex,
                 documentInfo.number,
                 documentInfo.name,
+                documentInfo.docType,
                 documentInfo.divisionId,
                 documentInfo.publishedTimestamp,
                 documentContentHash

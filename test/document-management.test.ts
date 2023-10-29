@@ -29,6 +29,7 @@ describe("LegalDocumentManager", () => {
   const DOCUMENT_INFO: DocumentInfo = {
     number: "2918/QĐ-UBND",
     name: "LAND LAW",
+    docType: "Law",
     divisionId: DIVISION_ID,
     publishedTimestamp: 1000n,
   };

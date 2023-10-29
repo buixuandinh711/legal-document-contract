@@ -7,6 +7,7 @@ interface ILegalDocumentManager is IPositionManager {
     struct DocumentInfo {
         string number;
         string name;
+        string docType;
         string divisionId;
         uint256 publishedTimestamp;
     }

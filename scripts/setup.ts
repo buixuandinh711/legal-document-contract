@@ -67,6 +67,7 @@ const main = async () => {
     {
       number: "10/2022/QH15",
       name: "LUẬT THỰC HIỆN DÂN CHỦ Ở CƠ SỞ",
+      docType: "Law",
       divisionId: "H1",
       publishedTimestamp: 1698470312,
     },
@@ -83,6 +84,7 @@ const main = async () => {
     {
       number: "20/2023/QH15",
       name: "LUẬT GIAO DỊCH ĐIỆN TỬ",
+      docType: "Law",
       divisionId: "H1",
       publishedTimestamp: 1698670312,
     },
@@ -99,6 +101,7 @@ const main = async () => {
     {
       number: "15/2023/QH15",
       name: "LUẬT KHÁM BỆNH, CHỮA BỆNH",
+      docType: "Law",
       divisionId: "H1",
       publishedTimestamp: 1698670312,
     },

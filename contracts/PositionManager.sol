@@ -54,7 +54,7 @@ contract PositionManager is
     }
 
     function requireDivisionManager(
-        string calldata divisionId,
+        string memory divisionId,
         uint256 positionIndex
     ) internal view {
         address sender = msg.sender;
@@ -70,7 +70,7 @@ contract PositionManager is
     }
 
     function requireValidSigner(
-        OfficerPosition calldata officerPosition
+        OfficerPosition memory officerPosition
     ) internal view {
         requireActiveDivision(officerPosition.divisionId);
         requireActiveOfficer(officerPosition.officerAddress);

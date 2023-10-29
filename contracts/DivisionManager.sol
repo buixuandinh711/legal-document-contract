@@ -18,7 +18,7 @@ contract DivisionManager is IDivisionManager, SystemAdminManger {
             revert DivisionNotCreated();
     }
 
-    function requireActiveDivision(string calldata divisionId) internal view {
+    function requireActiveDivision(string memory divisionId) internal view {
         if (_divisions[divisionId].status != DivisionStatus.ACTIVE)
             revert DivisionNotActive();
     }
